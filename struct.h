@@ -23,4 +23,10 @@ struct anggota {
     char email[100];
 };
 
+struct anggota agt[100] = {
+    {1, "Ryan Yanuar Pradana", "rynrr", "1234567890", "08123456789", "ryan@gmail.com"},
+    {2, "Faris Faizal Azhar", "sanz", "098765433211", "0887654321", "faris@gmail.com"},
+    {3, "Faisal Gustianto", "gusti", "5432167890", "08997654321", "faisal@gmail.com"},
+};
+
 #endif
