@@ -4,4 +4,5 @@
 
 int main() {
     tampilMenu();
+    return 0; 
 }
