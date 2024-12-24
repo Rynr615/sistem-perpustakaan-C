@@ -6,6 +6,7 @@
 #include "struct.h"
 #include <string.h>
 #include "sorting.h"
+#include <ctype.h>
 
 /*============================== Buku ====================================*/
 //Fungsi untuk menghitung jumlah buku yang ada
@@ -17,16 +18,32 @@ int hitungJumlahBuku() {
     return jumlah;
 }
 
-//Fungsi untuk mencari buku berdasarkan ID
-void cariBuku() {
-    int cari, found = 0;
-    printf("Masukkan ID buku yang ingin dicari: ");
-    scanf("%d", &cari);
+//Fungsi untuk mencari buku berdasarkan judul
 
-    for (int i = 0; i < hitungJumlahBuku(); i++) {
-        if (daftarBuku[i].idBuku == cari) {
-            found = 1;
-            printf("\n===========================================");
+void toLowerCase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower(str[i]);
+    }
+}
+
+// Fungsi cari buku
+void cariBuku() {
+    char cari[20];
+    int jumlahBuku = hitungJumlahBuku();
+    printf("Masukkan judul buku yang ingin dicari: ");
+    getchar();
+    scanf("%[^\n]", cari);
+
+    toLowerCase(cari);
+
+    for (int i = 0; i < jumlahBuku; i++) {
+        char tempJudul[20];
+        strcpy(tempJudul, daftarBuku[i].judul);
+        toLowerCase(tempJudul);
+
+        if (strstr(tempJudul, cari)) {
+            printf("\nHasil pencarian:\n");
+            printf("===========================================\n");
             printf("\nBuku ditemukan:\n");
             printf("ID Buku     : %d\n", daftarBuku[i].idBuku);
             printf("Judul Buku  : %s\n", daftarBuku[i].judul);
@@ -37,11 +54,9 @@ void cariBuku() {
         }
     }
 
-    if (!found) {
-        printf("\n======================================");
-        printf("\nBuku dengan ID %d tidak ditemukan!\n", cari);
-        printf("======================================\n");
-    }
+    printf("\n======================================");
+    printf("\nBuku dengan judul '%s' tidak ditemukan!\n", cari);
+    printf("======================================\n");
 }
 
 //Fungsi untuk memampilkan daftar buku
@@ -59,12 +74,12 @@ void tampilBuku() {
         scanf("%d", &pilihan);
         switch(pilihan) {
             case 1 :
-                sortingBukuAsc(jumlahBuku);
-                tampilBukuAsc(jumlahBuku);
+                quickAsc(daftarBuku, 0, jumlahBuku - 1);
+                tampilBukuSorting(jumlahBuku);
                 return;
             case 2 :
-                sortingBukuDesc(jumlahBuku);
-                tampilBukuDesc(jumlahBuku);
+                quickDesc(daftarBuku, 0, jumlahBuku - 1);
+                tampilBukuSorting(jumlahBuku);
                 return;
             default :
                 printf("Masukkan pilihan yang ada!!!");
@@ -217,27 +232,36 @@ int hitungJumlahAnggota() {
 }
 
 void tampilAnggota() {
-    int jumlahAnggota = hitungJumlahAnggota();
-    printf("============================== Data Anggota =====================================\n");
-    printf("| %-3s | %-20s | %-10s | %-12s | %-20s |\n", "ID", "Nama", "Username", "No. Tlp", "Email");
-    printf("---------------------------------------------------------------------------------\n");
+    int pilihan;
+    int jumlahAnggota = hitungJumlahBuku();
 
-    for (int i = 0; i < jumlahAnggota; i++) {
-        printf("| %-3d | %-20s | %-10s | %-12s | %-20s |\n",
-               agt[i].idAnggota,
-               agt[i].nama,
-               agt[i].username,
-               agt[i].nomorTlp,
-               agt[i].email);
-    }
-
-    printf("================================================================================\n");
+    do {
+        printf("======== Tampilkan Anggota ========\n");
+        printf("| [1] Ascending ( Default )       |\n");
+        printf("| [2] Descending                  |\n");
+        printf("===================================\n");
+        printf("Masukkan pilihan : ");
+        scanf("%d", &pilihan);
+        switch(pilihan) {
+            case 1 :
+                bubbleAsc(jumlahAnggota);
+                tampilAnggotaSorting(jumlahAnggota);
+                return;
+            case 2 :
+                bubbleDesc(jumlahAnggota);
+                tampilAnggotaSorting(jumlahAnggota);
+                return;
+            default :
+                printf("Masukkan pilihan yang ada!!!");
+                return;
+        }
+    } while(pilihan != 0);
 }
 
 void tambahAnggota() {
     int jumlahAnggota = hitungJumlahAnggota();
     int idTerakhir = hitungJumlahAnggota();
-
+    printf("%d\n", idTerakhir);
     if(jumlahAnggota > 100) {
         printf("Data sudah penuh. Tidak bisa menambahkan data lagi!");
         return;
@@ -249,21 +273,20 @@ void tambahAnggota() {
 
     printf("============ Tambah Anggota ==============\n");
     printf("Masukkan username : ");
-    scanf("%s", agtBaru.username);
+    scanf("%s", &agtBaru.username);
     printf("Masukkan password : ");
-    scanf("%s", agtBaru.password);
+    scanf("%s", &agtBaru.password);
 
     getchar();
 
     printf("Masukkan nama : ");
-    scanf("%[^\n]s", agtBaru.nama);
+    scanf("%[^\n]s", &agtBaru.nama);
     printf("Masukkan nomor telp : ");
-    scanf("%s", agtBaru.nomorTlp);
+    scanf("%s", &agtBaru.nomorTlp);
     printf("Masukkan email : ");
-    scanf("%s", agtBaru.email);
+    scanf("%s", &agtBaru.email);
 
     agt[jumlahAnggota] = agtBaru;
-    jumlahAnggota++;
 
     printf("\nData sudah berhasil ditambahkan\n");
     printf("ID Anggota : %d\n", agtBaru.idAnggota);
@@ -351,34 +374,33 @@ void editAnggota() {
     }
 }
 
-void cariAnggota() {
-    int cari;
-    int i, found = 0;
-    int jumlahAnggota = hitungJumlahAnggota();
+int cariAnggota(int jumlahAnggota, int cari) {
+    int low = 0;
+    int high = jumlahAnggota - 1;
 
-    printf("Masukkan id anggota yang ingin dicari : ");
-    scanf("%d", &cari);
-
-    i = 0;
-    while((i<jumlahAnggota) && (found == 0)) {
-        if(cari == agt[i].idAnggota) {
-            found = 1;
-        } else  {
-            i += 1;
+    while(low <= high) {
+        int mid = low + (high - low) / 2;
+        if(agt[mid].idAnggota == cari) {
+            return mid;
+        } else if (agt[mid].idAnggota < cari) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
         }
     }
+    return -1;
+}
 
-    if(found == 1) {
+void hasilCariAgt(int found, int cari) {
+    if(found != -1) {
         printf("\n=========================================\n");
-        printf("ID Anggota  : %d\n", agt[i].idAnggota);
-        printf("Nama        : %s\n", agt[i].nama);
-        printf("Username    : %s\n", agt[i].username);
-        printf("No. Telepon : %s\n", agt[i].nomorTlp);
-        printf("Email       : %s\n", agt[i].email);
+        printf("ID Anggota  : %d\n", agt[found].idAnggota);
+        printf("Nama        : %s\n", agt[found].nama);
+        printf("Username    : %s\n", agt[found].username);
+        printf("No. Telepon : %s\n", agt[found].nomorTlp);
+        printf("Email       : %s\n", agt[found].email);
         printf("=========================================\n");
-    }
-
-    if(found != 1) {
+    } else {
         printf("=========================================\n");
         printf(" Anggota dengan ID %d tidak di temukan \n", cari);
         printf("=========================================\n");
@@ -391,7 +413,6 @@ void hapusAnggota(int idHapus) {
     int foundIndex = -1;
     char pilih;
 
-    // Cari ID yang cocok
     for (int i = 0; i < jumlahAnggota; i++) {
         if (idHapus == agt[i].idAnggota) {
             found = 1;
@@ -432,7 +453,6 @@ void riwayatPeminjaman() {
     printf("--------------------------------------------------------------------------------\n");
 
     for (int i = 0; i < 100; i++) {
-        // Cek apakah slot peminjaman ini terisi
         if (pinjamBuku[i].idAnggota != 0) { 
             printf("| %-3d | %-10d | %-12s | %-20s | %02d/%02d/%04d | %-20s |\n", 
                    i + 1, 
@@ -450,16 +470,36 @@ void riwayatPeminjaman() {
 }
 
 
-// riwayatPengembalian() {
+void riwayatPengembalian() {
+    printf("============================= Riwayat Pengembalian =============================\n");
+    printf("| %-3s | %-10s | %-12s | %-20s | %-10s | %-20s |\n", 
+           "No", "ID Anggota", "Username", "Nama", "Tanggal", "Judul Buku");
+    printf("--------------------------------------------------------------------------------\n");
 
-// }
+    for (int i = 0; i < 100; i++) {
+        // Cek apakah slot peminjaman ini terisi
+        if (balikBuku[i].idAnggota != 0) { 
+            printf("| %-3d | %-10d | %-12s | %-20s | %02d/%02d/%04d | %-20s |\n", 
+                   i + 1, 
+                   balikBuku[i].idAnggota, 
+                   balikBuku[i].username, 
+                   balikBuku[i].nama, 
+                   balikBuku[i].date, 
+                   balikBuku[i].month, 
+                   balikBuku[i].year, 
+                   balikBuku[i].judul);
+        }
+    }
+
+    printf("================================================================================\n");
+}
 
 
 /*
 Menu untuk admin jika login sudah berhasil
 */
 void menuAdmin() {
-    int pilih;
+    int pilih, jumlahAnggota = hitungJumlahAnggota(), found;
 
     do {
         printf("\n=========== Halaman Admin ============\n");
@@ -510,7 +550,13 @@ void menuAdmin() {
                 hapusBuku(idBuku);
                 break;
             case 6 :
-                cariAnggota();
+                int cari;
+                printf("Masukkan id anggota yang ingin dicari : ");
+                scanf("%d", &cari);
+
+                bubbleAsc(jumlahAnggota);
+                found = cariAnggota(jumlahAnggota, cari);
+                hasilCariAgt(found, cari);
                 break;
             case 7 :
                 tampilAnggota();
@@ -531,7 +577,7 @@ void menuAdmin() {
                 riwayatPeminjaman();
                 break;
             case 12:
-                // riwayatPengembalian();
+                riwayatPengembalian();
                 break;
             default :
                 printf("\nSilahkan pilih menu yang ada!!!\n\n");
@@ -612,11 +658,22 @@ void pengembalianBuku(){
     }
 }
 
+void profile(int i) {
+    printf("===========================\n");
+    printf("Id Anggota : %d\n", agt[i].idAnggota);
+    printf("Nama : %s\n", agt[i].nama);
+    printf("Username : %s\n", agt[i].username);
+    printf("No. HP : %s\n", agt[i].nomorTlp);
+    printf("Email : %s\n", agt[i].email);
+    printf("===========================\n");
+    return;
+}
+
 /*
 Tampilkan menu anggota
 */
 
-void menuAnggota() {
+void menuAnggota(int idAgt) {
     int pilih;
     do {
         printf("\n========== Halaman Anggota ===========\n");
@@ -626,6 +683,8 @@ void menuAnggota() {
         printf("| [2] Tampilkan Buku                 |\n");
         printf("| [3] Pinjam Buku                    |\n");
         printf("| [4] Kembalikan Buku                |\n");
+        printf("|                                    |\n");
+        printf("| [5] Profile                        |\n");
         printf("|                                    |\n");
         printf("| [0] Kembali                        |\n");
         printf("======================================\n");
@@ -647,6 +706,9 @@ void menuAnggota() {
                 break;
             case 4 :
                 pengembalianBuku();
+                break;
+            case 5 :
+                profile(idAgt);
                 break;
             default :
                 printf("\nSilahkan pilih menu yang ada!!!\n\n");
@@ -685,7 +747,7 @@ void login() {
             if (strcmp(inputUsername, agt[i].username) == 0 && 
                 strcmp(inputPassword, agt[i].password) == 0) {
                 printf("\nLogin berhasil! Selamat datang, Anggota %s.\n\n", agt[i].username);
-                menuAnggota();
+                menuAnggota(i);
                 return;
             }
         }
@@ -734,6 +796,7 @@ void tampilMenu() {
                 break;
             default :
                 printf("Silahkan pilih menu yang ada!!!");
+                break;
         };
     } while (pilih != 0);
 }

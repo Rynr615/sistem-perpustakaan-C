@@ -14,7 +14,8 @@ struct buku daftarBuku[100] = {
     {2, "Omniscient Reader's Viewpoint", "Singshong", 10},
     {3, "Hero Killer", "Kkulbeol, Beolkkul", 12},
     {4, "Lookism", "Park Tae Joon", 5},
-    {5, "Solo Leveling", "Chu-Gong", 8}
+    {5, "Solo Leveling", "Chu-Gong", 8},
+    {6, "Leviathan", "Chu-Gong", 8}
 };
 
 struct admin {
